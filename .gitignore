@@ -1,0 +1,5 @@
+input.in
+__pycache__
+.*
+!.python-version
+!.gitignore
