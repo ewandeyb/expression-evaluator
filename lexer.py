@@ -33,7 +33,7 @@ class Lexer:
     elif re.fullmatch(cls.OPERATOR, token):
       if token in "+-=":
         return Token(TokenType.PRED1, token)
-      elif token in "*/%":
+      else:
         return Token(TokenType.PRED2, token)
     elif re.fullmatch(cls.PAREN, token):
       return Token(TokenType.PRED3, token)
