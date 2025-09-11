@@ -12,14 +12,12 @@ from lexer import Lexer, Token, TokenType
                 Token(TokenType.INTEGER, "1"),
                 Token(TokenType.PRED1, "+"),
                 Token(TokenType.INTEGER, "2"),
-                Token(TokenType.EOF, None),
             ],
         ),
         (
             "varname",
             [
                 Token(TokenType.VAR, "varname"),
-                Token(TokenType.EOF, None),
             ],
         ),
         (
@@ -28,7 +26,6 @@ from lexer import Lexer, Token, TokenType
                 Token(TokenType.VAR, "varname"),
                 Token(TokenType.ASSIGNMENT, None),
                 Token(TokenType.INTEGER, "3"),
-                Token(TokenType.EOF, None),
             ],
         ),
         (
@@ -41,20 +38,19 @@ from lexer import Lexer, Token, TokenType
                 Token(TokenType.PRED1, "-"),
                 Token(TokenType.INTEGER, "5"),
                 Token(TokenType.PRED3, ")"),
-                Token(TokenType.EOF, None),
             ],
         ),
     ],
 )
 def test_lexer(input_string, expected_tokens):
     lexer = Lexer(input_string)
-    tokens = lexer.tokenize()
-    assert tokens == expected_tokens
+    tokens = lexer.tokenize().token_list
+    assert list(tokens) == expected_tokens
 
 
 def test_lexer_invalid_character():
     lexer = Lexer("?")
 
     with pytest.raises(ValueError) as excinfo:
-        lexer.tokenize()
+        lexer.tokenize().next()
     assert "Invalid character: ?" in str(excinfo.value)
