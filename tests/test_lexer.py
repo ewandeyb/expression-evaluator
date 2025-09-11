@@ -18,14 +18,14 @@ from lexer import Lexer, Token, TokenType
         (
             "varname",
             [
-                Token(TokenType.VAR, "var_name"),
+                Token(TokenType.VAR, "varname"),
                 Token(TokenType.EOF, None),
             ],
         ),
         (
             "varname = 3",
             [
-                Token(TokenType.VAR, "var_name"),
+                Token(TokenType.VAR, "varname"),
                 Token(TokenType.ASSIGNMENT, None),
                 Token(TokenType.INTEGER, "3"),
                 Token(TokenType.EOF, None),
