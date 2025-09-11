@@ -50,3 +50,11 @@ def test_lexer(input_string, expected_tokens):
     lexer = Lexer(input_string)
     tokens = lexer.tokenize()
     assert tokens == expected_tokens
+
+
+def test_lexer_invalid_character():
+    lexer = Lexer("?")
+
+    with pytest.raises(ValueError) as excinfo:
+        lexer.tokenize()
+    assert "Invalid character: ?" in str(excinfo.value)
