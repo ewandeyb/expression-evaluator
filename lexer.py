@@ -4,7 +4,7 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    INTEGER = "INTEGER"
+    NUMBER = "NUMBER"
     VAR = "VAR"
     PRED1 = "PRED1"
     PRED2 = "PRED2"
@@ -31,7 +31,7 @@ class Lexer:
     @classmethod
     def helper(cls, token):
         if re.fullmatch(cls.NUMBER, token):
-            return Token(TokenType.INTEGER, token)
+            return Token(TokenType.NUMBER, token)
         elif re.fullmatch(cls.VARIABLE, token):
             return Token(TokenType.VAR, token)
         elif re.fullmatch(cls.OPERATOR, token):

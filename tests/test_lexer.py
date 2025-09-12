@@ -9,9 +9,9 @@ from lexer import Lexer, Token, TokenType
         (
             "1 + 2",
             [
-                Token(TokenType.INTEGER, "1"),
+                Token(TokenType.NUMBER, "1"),
                 Token(TokenType.PRED1, "+"),
-                Token(TokenType.INTEGER, "2"),
+                Token(TokenType.NUMBER, "2"),
                 Token(TokenType.EOF, None),
             ],
         ),
@@ -27,19 +27,19 @@ from lexer import Lexer, Token, TokenType
             [
                 Token(TokenType.VAR, "varname"),
                 Token(TokenType.ASSIGNMENT, None),
-                Token(TokenType.INTEGER, "3"),
+                Token(TokenType.NUMBER, "3"),
                 Token(TokenType.EOF, None),
             ],
         ),
         (
             "3 * (4 - 5)",
             [
-                Token(TokenType.INTEGER, "3"),
+                Token(TokenType.NUMBER, "3"),
                 Token(TokenType.PRED2, "*"),
                 Token(TokenType.PRED3, "("),
-                Token(TokenType.INTEGER, "4"),
+                Token(TokenType.NUMBER, "4"),
                 Token(TokenType.PRED1, "-"),
-                Token(TokenType.INTEGER, "5"),
+                Token(TokenType.NUMBER, "5"),
                 Token(TokenType.PRED3, ")"),
                 Token(TokenType.EOF, None),
             ],
