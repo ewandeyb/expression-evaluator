@@ -1,7 +1,6 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Self
 
 
 class TokenType(Enum):
@@ -11,6 +10,7 @@ class TokenType(Enum):
     PRED2 = "PRED2"
     PRED3 = "PRED3"
     ASSIGNMENT = "ASSIGNMENT"
+    EOF = "EOF"
 
 
 @dataclass
@@ -27,7 +27,6 @@ class Lexer:
 
     def __init__(self, text: str):
         self.text = text
-        self.token_list = None
 
     @classmethod
     def helper(cls, token):
@@ -48,7 +47,7 @@ class Lexer:
         else:
             raise ValueError(f"Invalid character: {token}")
 
-    def tokenize(self) -> Self:
+    def tokenize(self) -> list[Token]:
         # Set valid definitions for different token types
         definitions = "|".join(
             [
@@ -65,12 +64,6 @@ class Lexer:
         tokens = re.findall(pattern, self.text)
 
         # Map tokens to their respective types
-        self.token_list = (self.helper(token) for token in tokens)
-
-        return self
-
-    def next(self) -> Token:
-        """
-        Wrapper for advancing the generator.
-        """
-        return next(self.token_list)
+        token_list = [self.helper(token) for token in tokens]
+        token_list.append(Token(TokenType.EOF, None))
+        return token_list
