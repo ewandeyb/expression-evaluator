@@ -20,7 +20,7 @@ class Token:
 
 
 class Lexer:
-    NUMBER = r"\d+\.?\d*"
+    NUMBER = r"\d+\.?\d*|\.\d+"
     VARIABLE = r"[a-zA-Z]+[0-9a-zA-Z]*"
     OPERATOR = r"[=+-/*%]"
     PAREN = r"[()]"
