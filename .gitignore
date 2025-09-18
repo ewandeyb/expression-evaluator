@@ -3,3 +3,4 @@ __pycache__
 .*
 !.python-version
 !.gitignore
+!.pre-commit-config.yaml
