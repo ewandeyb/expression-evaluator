@@ -6,10 +6,10 @@ from enum import Enum
 class TokenType(Enum):
     NUMBER = "NUMBER"
     VAR = "VAR"
-    PRED1 = "PRED1"
-    PRED2 = "PRED2"
-    PRED3 = "PRED3"
-    ASSIGNMENT = "ASSIGNMENT"
+    PRED1 = "PRED1"  # + -
+    PRED2 = "PRED2"  # * / %
+    PRED3 = "PRED3"  # ( )
+    ASSIGNMENT = "ASSIGNMENT"  # =
     EOF = "EOF"
 
 
