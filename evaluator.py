@@ -52,6 +52,12 @@ class Evaluator:
         self._walk(self.ast)
 
     def execute(self):
+        """
+        Assigns the expression value to a variable in the symbol table.
+
+        Returns the name of the variable assigned to.
+        """
+
         var_name = self.postfix[0]
 
         stack = []
