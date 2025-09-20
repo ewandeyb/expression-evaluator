@@ -1,5 +1,6 @@
 from typing import List
 
+from evaluator import NodeType
 from lexer import Token, TokenType
 
 
@@ -46,7 +47,7 @@ class Parser:
     def parse_statement(self):
         """
         statement → IDENTIFIER '=' expression
-        Returns: ('assignment', identifier, expression)
+        Returns: (NodeType.ASSIGNMENT, identifier, expression)
         """
         # Must start with an identifier
         if not self.match(TokenType.VAR):
@@ -70,7 +71,7 @@ class Parser:
 
         expr = self.parse_expression()
 
-        return ("assignment", identifier.value, expr)
+        return (NodeType.ASSIGNMENT, identifier.value, expr)
 
     def parse_expression(self):
         """
@@ -82,7 +83,7 @@ class Parser:
         while self.match(TokenType.PRED1):  # + or -
             operator = self.advance()
             right = self.parse_term()
-            left = ("binary_op", operator.value, left, right)
+            left = (NodeType.BINARY_OP, operator.value, left, right)
 
         return left
 
@@ -96,7 +97,7 @@ class Parser:
         while self.match(TokenType.PRED2):  # *, /, %
             operator = self.advance()
             right = self.parse_factor()
-            left = ("binary_op", operator.value, left, right)
+            left = (NodeType.BINARY_OP, operator.value, left, right)
 
         return left
 
@@ -112,11 +113,11 @@ class Parser:
                 value = float(token.value)
             else:
                 value = int(token.value)
-            return ("number", value)
+            return (NodeType.NUMBER, value)
 
         elif self.match(TokenType.VAR):
             token = self.advance()
-            return ("variable", token.value)
+            return (NodeType.VARIABLE, token.value)
 
         elif self.match(TokenType.PRED3) and self.peek().value == "(":
             self.advance()  # consume '('
