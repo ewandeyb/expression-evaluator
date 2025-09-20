@@ -43,22 +43,6 @@ class Parser:
         """Check if current token matches the given type."""
         return self.peek().type == token_type
 
-    def consume(
-        self,
-        token_type: TokenType,
-        message: str | None = None,
-    ) -> Token:
-        """Consume a token of the expected type or raise an error."""
-        if self.match(token_type):
-            return self.advance()
-
-        current_token = self.peek()
-        if message is None:
-            message = f"Expected {token_type.value}, \
-                        got {current_token.type.value}"
-
-        raise ParseError(message)
-
     def parse_statement(self):
         """
         statement → IDENTIFIER '=' expression
