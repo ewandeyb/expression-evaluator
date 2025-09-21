@@ -174,9 +174,100 @@
             };
         input.click();
       }
-      function processLines(){
-        pass
-      }
+      function processLines() {
+            const inputText = document.getElementById('inputLines').value;
+            const lines = inputText.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                showError('No input lines to process');
+                return;
+            }
+
+            // Clear previous results
+            document.getElementById('results').innerHTML = 'Processing...';
+            document.getElementById('variablesUsed').textContent = '';
+            document.getElementById('errorsFound').textContent = 'None';
+            
+            let allVariables = new Set();
+            let errors = [];
+            let results = [];
+
+            let completed = 0;
+            
+            lines.forEach((line, index) => {
+                const lineNum = index + 1;
+                
+                fetch('/evaluate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({expression: line.trim()})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        errors.push(`Line ${lineNum}: ${data.error}`);
+                    } else {
+                        results.push({
+                            line: lineNum,
+                            input: data.input,
+                            postfix: data.postfix,
+                            result: data.result
+                        });
+                        
+                        // Collect variables from symbol table
+                        Object.keys(data.symbol_table).forEach(var_ => allVariables.add(var_));
+                    }
+                    
+                    completed++;
+                    if (completed === lines.length) {
+                        updateDisplay(results, Array.from(allVariables), errors, data.symbol_table);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errors.push(`Line ${lineNum}: Network error`);
+                    completed++;
+                    if (completed === lines.length) {
+                        updateDisplay(results, Array.from(allVariables), errors, {});
+                    }
+                });
+            });
+        }
+
+      function updateDisplay(results, variables, errors, symbolTable) {
+            // Update results
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+            
+            results.forEach(result => {
+                html += `Line ${result.line}: ${result.result}\n`;
+                html += `Postfix: ${result.postfix}\n\n`;
+            });
+            
+            resultsDiv.textContent = html || 'No successful results.';
+            
+            // Update variables
+            const variablesDiv = document.getElementById('variablesUsed');
+            if (symbolTable && Object.keys(symbolTable).length > 0) {
+                let varText = '';
+                Object.entries(symbolTable).forEach(([varName, value]) => {
+                    varText += `${varName} = ${value}\n`;
+                });
+                variablesDiv.textContent = varText;
+            } else {
+                variablesDiv.textContent = 'None';
+            }
+            
+            // Update errors
+            const errorsDiv = document.getElementById('errorsFound');
+            if (errors.length > 0) {
+                errorsDiv.textContent = errors.join('\n');
+            } else {
+                errorsDiv.textContent = 'None';
+            }
+        }
     </script>
 </body>
 </html>
