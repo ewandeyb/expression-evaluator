@@ -55,5 +55,15 @@ def evaluate():
     except Exception as e:
         return jsonify({'error': f'Error: {str(e)}'})
 
+@app.route('/clear_variables', methods=['POST'])
+def clear_variables():
+    global symbol_table
+    symbol_table.clear()
+    return jsonify({'success': True, 'symbol_table': {}})
+
+@app.route('/get_variables', methods=['GET'])
+def get_variables():
+    return jsonify({'symbol_table': dict(symbol_table)})
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

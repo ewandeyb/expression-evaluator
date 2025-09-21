@@ -188,51 +188,64 @@
             document.getElementById('variablesUsed').textContent = '';
             document.getElementById('errorsFound').textContent = 'None';
             
-            let allVariables = new Set();
-            let errors = [];
-            let results = [];
-
-            let completed = 0;
-            
-            lines.forEach((line, index) => {
-                const lineNum = index + 1;
+            // First, clear the symbol table for a fresh start
+            fetch('/clear_variables', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(() => {
+                // Now process all lines
+                let allVariables = new Set();
+                let errors = [];
+                let results = [];
+                let completed = 0;
                 
-                fetch('/evaluate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({expression: line.trim()})
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        errors.push(`Line ${lineNum}: ${data.error}`);
-                    } else {
-                        results.push({
-                            line: lineNum,
-                            input: data.input,
-                            postfix: data.postfix,
-                            result: data.result
-                        });
-                        
-                        // Collect variables from symbol table
-                        Object.keys(data.symbol_table).forEach(var_ => allVariables.add(var_));
-                    }
+                lines.forEach((line, index) => {
+                    const lineNum = index + 1;
                     
-                    completed++;
-                    if (completed === lines.length) {
-                        updateDisplay(results, Array.from(allVariables), errors, data.symbol_table);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    errors.push(`Line ${lineNum}: Network error`);
-                    completed++;
-                    if (completed === lines.length) {
-                        updateDisplay(results, Array.from(allVariables), errors, {});
-                    }
+                    fetch('/evaluate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({expression: line.trim()})
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            errors.push(`Line ${lineNum}: ${data.error}`);
+                        } else {
+                            results.push({
+                                line: lineNum,
+                                input: data.input,
+                                postfix: data.postfix,
+                                result: data.result
+                            });
+                            
+                            // Collect variables from symbol table
+                            Object.keys(data.symbol_table).forEach(var_ => allVariables.add(var_));
+                        }
+                        
+                        completed++;
+                        if (completed === lines.length) {
+                            updateDisplay(results, Array.from(allVariables), errors, data.symbol_table);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        errors.push(`Line ${lineNum}: Network error`);
+                        completed++;
+                        if (completed === lines.length) {
+                            updateDisplay(results, Array.from(allVariables), errors, {});
+                        }
+                    });
                 });
+            })
+            .catch(error => {
+                console.error('Error clearing variables:', error);
+                showError('Failed to clear variables');
             });
         }
 
