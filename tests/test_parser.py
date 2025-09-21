@@ -2,6 +2,8 @@ from parser import ParseError, Parser, Token, TokenType
 
 import pytest
 
+from evaluator import NodeType
+
 
 class TestParser:
     """Test cases for the Parser class."""
@@ -16,7 +18,7 @@ class TestParser:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "x", ("number", 42))
+        assert ast == (NodeType.ASSIGNMENT, "x", (NodeType.NUMBER, 42))
 
     def test_parse_variable_assignment(self):
         """Test parsing assignment with variable."""
@@ -28,7 +30,7 @@ class TestParser:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "y", ("variable", "x"))
+        assert ast == (NodeType.ASSIGNMENT, "y", (NodeType.VARIABLE, "x"))
 
     def test_parse_addition_assignment(self):
         """Test parsing assignment with addition expression."""
@@ -43,9 +45,14 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         assert ast == (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "result",
-            ("binary_op", "+", ("number", 1), ("number", 2)),
+            (
+                NodeType.BINARY_OP,
+                "+",
+                (NodeType.NUMBER, 1),
+                (NodeType.NUMBER, 2),
+            ),
         )
 
     def test_parse_multiplication_precedence(self):
@@ -63,13 +70,18 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "result",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "+",
-                ("number", 1),
-                ("binary_op", "*", ("number", 2), ("number", 3)),
+                (NodeType.NUMBER, 1),
+                (
+                    NodeType.BINARY_OP,
+                    "*",
+                    (NodeType.NUMBER, 2),
+                    (NodeType.NUMBER, 3),
+                ),
             ),
         )
         assert ast == expected
@@ -89,13 +101,18 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "x",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "+",
-                ("binary_op", "+", ("number", 1), ("number", 2)),
-                ("number", 3),
+                (
+                    NodeType.BINARY_OP,
+                    "+",
+                    (NodeType.NUMBER, 1),
+                    (NodeType.NUMBER, 2),
+                ),
+                (NodeType.NUMBER, 3),
             ),
         )
         assert ast == expected
@@ -116,13 +133,18 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "result",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "*",
-                ("binary_op", "+", ("number", 1), ("number", 2)),
-                ("number", 3),
+                (
+                    NodeType.BINARY_OP,
+                    "+",
+                    (NodeType.NUMBER, 1),
+                    (NodeType.NUMBER, 2),
+                ),
+                (NodeType.NUMBER, 3),
             ),
         )
         assert ast == expected
@@ -144,13 +166,13 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "x",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "+",
-                ("number", 1),
-                ("number", 2),
+                (NodeType.NUMBER, 1),
+                (NodeType.NUMBER, 2),
             ),
         )
         assert ast == expected
@@ -170,13 +192,18 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "result",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "+",
-                ("variable", "a"),
-                ("binary_op", "*", ("variable", "b"), ("number", 2)),
+                (NodeType.VARIABLE, "a"),
+                (
+                    NodeType.BINARY_OP,
+                    "*",
+                    (NodeType.VARIABLE, "b"),
+                    (NodeType.NUMBER, 2),
+                ),
             ),
         )
         assert ast == expected
@@ -195,7 +222,11 @@ class TestParser:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "x", ("number", expected_value))
+        assert ast == (
+            NodeType.ASSIGNMENT,
+            "x",
+            (NodeType.NUMBER, expected_value),
+        )
 
     @pytest.mark.parametrize(
         "token_type,operator",
@@ -220,9 +251,14 @@ class TestParser:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "result",
-            ("binary_op", operator, ("number", 1), ("number", 2)),
+            (
+                NodeType.BINARY_OP,
+                operator,
+                (NodeType.NUMBER, 1),
+                (NodeType.NUMBER, 2),
+            ),
         )
         assert ast == expected
 
@@ -230,7 +266,7 @@ class TestParser:
         "var_name",
         [
             "x",
-            "variable",
+            NodeType.VARIABLE,
             "var123",
             "longVariableName",
             "a1b2c3",
@@ -246,7 +282,7 @@ class TestParser:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", var_name, ("number", 5))
+        assert ast == (NodeType.ASSIGNMENT, var_name, (NodeType.NUMBER, 5))
 
     def test_parse_empty_input(self):
         """Test that empty input returns None."""
@@ -272,10 +308,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.NUMBER, "3"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "+",
-                    ("number", 1),
-                    ("binary_op", "*", ("number", 2), ("number", 3)),
+                    (NodeType.NUMBER, 1),
+                    (
+                        NodeType.BINARY_OP,
+                        "*",
+                        (NodeType.NUMBER, 2),
+                        (NodeType.NUMBER, 3),
+                    ),
                 ),
             ),
             # Test: 1 * 2 + 3 should be (1 * 2) + 3
@@ -288,10 +329,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.NUMBER, "3"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "+",
-                    ("binary_op", "*", ("number", 1), ("number", 2)),
-                    ("number", 3),
+                    (
+                        NodeType.BINARY_OP,
+                        "*",
+                        (NodeType.NUMBER, 1),
+                        (NodeType.NUMBER, 2),
+                    ),
+                    (NodeType.NUMBER, 3),
                 ),
             ),
             # Test: 1 - 2 - 3 should be (1 - 2) - 3 (left associative)
@@ -304,10 +350,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.NUMBER, "3"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "-",
-                    ("binary_op", "-", ("number", 1), ("number", 2)),
-                    ("number", 3),
+                    (
+                        NodeType.BINARY_OP,
+                        "-",
+                        (NodeType.NUMBER, 1),
+                        (NodeType.NUMBER, 2),
+                    ),
+                    (NodeType.NUMBER, 3),
                 ),
             ),
             # Test: 1 / 2 / 3 should be (1 / 2) / 3 (left associative)
@@ -320,10 +371,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.NUMBER, "3"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "/",
-                    ("binary_op", "/", ("number", 1), ("number", 2)),
-                    ("number", 3),
+                    (
+                        NodeType.BINARY_OP,
+                        "/",
+                        (NodeType.NUMBER, 1),
+                        (NodeType.NUMBER, 2),
+                    ),
+                    (NodeType.NUMBER, 3),
                 ),
             ),
         ],
@@ -343,7 +399,7 @@ class TestParserPrecedenceAndAssociativity:
 
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "result", expected_ast)
+        assert ast == (NodeType.ASSIGNMENT, "result", expected_ast)
 
     @pytest.mark.parametrize(
         "expression_tokens,expected_ast",
@@ -360,10 +416,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.NUMBER, "3"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "*",
-                    ("binary_op", "+", ("number", 1), ("number", 2)),
-                    ("number", 3),
+                    (
+                        NodeType.BINARY_OP,
+                        "+",
+                        (NodeType.NUMBER, 1),
+                        (NodeType.NUMBER, 2),
+                    ),
+                    (NodeType.NUMBER, 3),
                 ),
             ),
             # Test: 1 * (2 + 3)
@@ -378,10 +439,15 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.PRED3, ")"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "*",
-                    ("number", 1),
-                    ("binary_op", "+", ("number", 2), ("number", 3)),
+                    (NodeType.NUMBER, 1),
+                    (
+                        NodeType.BINARY_OP,
+                        "+",
+                        (NodeType.NUMBER, 2),
+                        (NodeType.NUMBER, 3),
+                    ),
                 ),
             ),
             # Test: (1 + 2) * (3 + 4)
@@ -400,10 +466,20 @@ class TestParserPrecedenceAndAssociativity:
                     Token(TokenType.PRED3, ")"),
                 ],
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "*",
-                    ("binary_op", "+", ("number", 1), ("number", 2)),
-                    ("binary_op", "+", ("number", 3), ("number", 4)),
+                    (
+                        NodeType.BINARY_OP,
+                        "+",
+                        (NodeType.NUMBER, 1),
+                        (NodeType.NUMBER, 2),
+                    ),
+                    (
+                        NodeType.BINARY_OP,
+                        "+",
+                        (NodeType.NUMBER, 3),
+                        (NodeType.NUMBER, 4),
+                    ),
                 ),
             ),
         ],
@@ -425,7 +501,7 @@ class TestParserPrecedenceAndAssociativity:
 
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "result", expected_ast)
+        assert ast == (NodeType.ASSIGNMENT, "result", expected_ast)
 
 
 class TestParserErrors:
@@ -586,13 +662,13 @@ class TestParserEdgeCases:
         parser = Parser(tokens)
         ast = parser.parse()
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "x",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "+",
-                ("number", 1),
-                ("number", 2),
+                (NodeType.NUMBER, 1),
+                (NodeType.NUMBER, 2),
             ),
         )
         assert ast == expected
@@ -621,22 +697,32 @@ class TestParserEdgeCases:
 
         # Expected: a + (b * c) - ((d / e) % f)
         expected = (
-            "assignment",
+            NodeType.ASSIGNMENT,
             "x",
             (
-                "binary_op",
+                NodeType.BINARY_OP,
                 "-",
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "+",
-                    ("variable", "a"),
-                    ("binary_op", "*", ("variable", "b"), ("variable", "c")),
+                    (NodeType.VARIABLE, "a"),
+                    (
+                        NodeType.BINARY_OP,
+                        "*",
+                        (NodeType.VARIABLE, "b"),
+                        (NodeType.VARIABLE, "c"),
+                    ),
                 ),
                 (
-                    "binary_op",
+                    NodeType.BINARY_OP,
                     "%",
-                    ("binary_op", "/", ("variable", "d"), ("variable", "e")),
-                    ("variable", "f"),
+                    (
+                        NodeType.BINARY_OP,
+                        "/",
+                        (NodeType.VARIABLE, "d"),
+                        (NodeType.VARIABLE, "e"),
+                    ),
+                    (NodeType.VARIABLE, "f"),
                 ),
             ),
         )
@@ -652,7 +738,7 @@ class TestParserEdgeCases:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "y", ("variable", "x"))
+        assert ast == (NodeType.ASSIGNMENT, "y", (NodeType.VARIABLE, "x"))
 
     def test_single_number_assignment(self):
         """Test assignment of single number."""
@@ -664,4 +750,4 @@ class TestParserEdgeCases:
         ]
         parser = Parser(tokens)
         ast = parser.parse()
-        assert ast == ("assignment", "x", ("number", 42))
+        assert ast == (NodeType.ASSIGNMENT, "x", (NodeType.NUMBER, 42))
