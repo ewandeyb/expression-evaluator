@@ -163,7 +163,7 @@
       function loadFile(){
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.in,.txt';
+        input.accept = '.in';
         input.onchange = e => {
             const file = e.target.files[0];
             const reader = new FileReader();
