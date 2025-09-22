@@ -291,6 +291,56 @@ class TestParser:
         result = parser.parse()
         assert result is None
 
+    def test_parse_negative_number_assignment(self):
+        """Test parsing assignment with negative number using unary minus operator."""
+        tokens = [
+            Token(TokenType.VAR, "x"),
+            Token(TokenType.ASSIGNMENT, "="),
+            Token(TokenType.PRED1, "-"),
+            Token(TokenType.NUMBER, "5"),
+            Token(TokenType.EOF, None),
+        ]
+        parser = Parser(tokens)
+        # This should now succeed with unary minus support
+        ast = parser.parse()
+        expected_ast = (NodeType.ASSIGNMENT, "x", (NodeType.UNARY_OP, "-", (NodeType.NUMBER, 5)))
+        assert ast == expected_ast
+
+    def test_parse_positive_number_assignment(self):
+        """Test parsing assignment with positive number using unary plus operator."""
+        tokens = [
+            Token(TokenType.VAR, "y"),
+            Token(TokenType.ASSIGNMENT, "="),
+            Token(TokenType.PRED1, "+"),
+            Token(TokenType.NUMBER, "3"),
+            Token(TokenType.EOF, None),
+        ]
+        parser = Parser(tokens)
+        ast = parser.parse()
+        expected_ast = (NodeType.ASSIGNMENT, "y", (NodeType.UNARY_OP, "+", (NodeType.NUMBER, 3)))
+        assert ast == expected_ast
+
+    def test_parse_complex_unary_expression(self):
+        """Test parsing more complex expressions with unary operators."""
+        # z = -5 + 3
+        tokens = [
+            Token(TokenType.VAR, "z"),
+            Token(TokenType.ASSIGNMENT, "="),
+            Token(TokenType.PRED1, "-"),
+            Token(TokenType.NUMBER, "5"),
+            Token(TokenType.PRED1, "+"),
+            Token(TokenType.NUMBER, "3"),
+            Token(TokenType.EOF, None),
+        ]
+        parser = Parser(tokens)
+        ast = parser.parse()
+        expected_ast = (
+            NodeType.ASSIGNMENT, 
+            "z", 
+            (NodeType.BINARY_OP, "+", (NodeType.UNARY_OP, "-", (NodeType.NUMBER, 5)), (NodeType.NUMBER, 3))
+        )
+        assert ast == expected_ast
+
 
 class TestParserPrecedenceAndAssociativity:
     """Test cases for operator precedence and associativity."""
@@ -551,7 +601,7 @@ class TestParserErrors:
         tokens = [
             Token(TokenType.VAR, "x"),
             Token(TokenType.ASSIGNMENT, "="),
-            Token(TokenType.PRED1, "+"),
+            Token(TokenType.PRED2, "*"),  # Invalid: multiplication without left operand
             Token(TokenType.NUMBER, "1"),
             Token(TokenType.EOF, None),
         ]

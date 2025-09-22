@@ -44,6 +44,24 @@ from lexer import Lexer, Token, TokenType
                 Token(TokenType.EOF, None),
             ],
         ),
+        (
+            "-5",
+            [
+                Token(TokenType.PRED1, "-"),
+                Token(TokenType.NUMBER, "5"),
+                Token(TokenType.EOF, None),
+            ],
+        ),
+        (
+            "x = -5",
+            [
+                Token(TokenType.VAR, "x"),
+                Token(TokenType.ASSIGNMENT, None),
+                Token(TokenType.PRED1, "-"),
+                Token(TokenType.NUMBER, "5"),
+                Token(TokenType.EOF, None),
+            ],
+        ),
     ],
 )
 def test_lexer(input_string, expected_tokens):
