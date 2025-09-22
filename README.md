@@ -1,7 +1,7 @@
 # Expression Evaluator
 
 A web-based mathematical expression evaluator with support for variable assignments and file input processing.
-
+![alt text](image.png)
 ## Prerequisites
 
 Make sure to install `uv` on your device:
@@ -41,7 +41,7 @@ uv run main.py
 python main.py
 ```
 
-Then open your browser and navigate to: `http://localhost:5000`
+Then open your browser and navigate to: `http://localhost:8000`
 
 ### Running Tests
 
