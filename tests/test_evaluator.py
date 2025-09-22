@@ -44,6 +44,30 @@ def _eval(string: str, symbol_table: dict):
             "a",
             id="symbol_table",
         ),
+        pytest.param(
+            "a=0-5",
+            {},
+            "a 0 5 - =",
+            {"a": -5},
+            "a",
+            id="negative_via_subtraction",
+        ),
+        pytest.param(
+            "a=-5",
+            {},
+            "a 5 u- =",
+            {"a": -5},
+            "a",
+            id="direct_negative_number",
+        ),
+        pytest.param(
+            "a=+7",
+            {},
+            "a 7 u+ =",
+            {"a": 7},
+            "a",
+            id="direct_positive_number",
+        ),
     ],
 )
 def test_evaluator(

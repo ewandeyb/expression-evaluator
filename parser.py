@@ -18,7 +18,8 @@ class Parser:
     statement  → IDENTIFIER '=' expression
     expression → term (( '+' | '-' ) term)*
     term       → factor (( '*' | '/' | '%' ) factor)*
-    factor     → NUMBER | IDENTIFIER | '(' expression ')'
+    factor     → unary | NUMBER | IDENTIFIER | '(' expression ')'
+    unary      → ( '+' | '-' ) factor
 
     Note: All statements are assignment statements.
     """
@@ -103,10 +104,17 @@ class Parser:
 
     def parse_factor(self):
         """
-        factor → NUMBER | IDENTIFIER | '(' expression ')'
-        Returns: ('number', value) | ('variable', name) | expression
+        factor → unary | NUMBER | IDENTIFIER | '(' expression ')'
+        unary  → ( '+' | '-' ) factor
+        Returns: ('number', value) | ('variable', name) | ('unary_op', operator, operand) | expression
         """
-        if self.match(TokenType.NUMBER):
+        # Handle unary operators (+ and -)
+        if self.match(TokenType.PRED1):  # + or -
+            operator = self.advance()
+            operand = self.parse_factor()  # recursively parse the operand
+            return (NodeType.UNARY_OP, operator.value, operand)
+        
+        elif self.match(TokenType.NUMBER):
             token = self.advance()
             # Convert to appropriate numeric type
             if "." in token.value:
