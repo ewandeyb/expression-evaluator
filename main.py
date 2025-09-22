@@ -12,58 +12,68 @@ def index():
 @app.route('/evaluate', methods=['POST'])
 def evaluate():
     data = request.get_json()
-    expression = data.get('expression', '').strip()
+    expressions = data.get('expressions', [])
     
-    if not expression:
-        return jsonify({'error': 'Please enter an expression'})
+    if not expressions:
+        return jsonify({'error': 'Please provide expressions'})
     
-    try:
-        # Lexical analysis
-        lexer = Lexer(expression)
-        tokens = lexer.tokenize()
+    # Create a local symbol table for this request to ensure isolation
+    symbol_table = {}
+    
+    results = []
+    errors = []
+    
+    for i, expression in enumerate(expressions):
+        line_num = i + 1
+        expression = expression.strip()
         
-        # Parsing
-        parser = Parser(tokens)
-        ast = parser.parse()
-        
-        if ast is None:
-            return jsonify({'error': 'Empty expression'})
-        
-        # Evaluation
-        evaluator = Evaluator(ast, symbol_table)
-        evaluator.evaluate()
-        
-        # Get postfix notation
-        postfix_str = str(evaluator)
-        
-        # Execute the assignment
-        assigned_var = evaluator.execute()
-        result_value = symbol_table[assigned_var]
-        
-        return jsonify({
-            'success': True,
-            'input': expression,
-            'postfix': postfix_str,
-            'result': f"{assigned_var} = {result_value}",
-            'symbol_table': dict(symbol_table)
-        })
-        
-    except ParseError as e:
-        return jsonify({'error': f'Parse Error: {str(e)}'})
-    except NameError as e:
-        return jsonify({'error': f'Name Error: {str(e)}'})
-    except Exception as e:
-        return jsonify({'error': f'Error: {str(e)}'})
-
-@app.route('/clear_variables', methods=['POST'])
-def clear_variables():
-    global symbol_table
-    symbol_table.clear()
-    return jsonify({'success': True, 'symbol_table': {}})
-
-@app.route('/get_variables', methods=['GET'])
-def get_variables():
-    return jsonify({'symbol_table': dict(symbol_table)})
+        if not expression:
+            continue
+            
+        try:
+            # Lexical analysis
+            lexer = Lexer(expression)
+            tokens = lexer.tokenize()
+            
+            # Parsing
+            parser = Parser(tokens)
+            ast = parser.parse()
+            
+            if ast is None:
+                errors.append(f'Line {line_num}: Empty expression')
+                continue
+            
+            # Evaluation
+            evaluator = Evaluator(ast, symbol_table)
+            evaluator.evaluate()
+            
+            # Get postfix notation
+            postfix_str = str(evaluator)
+            
+            # Execute the assignment
+            assigned_var = evaluator.execute()
+            result_value = symbol_table[assigned_var]
+            
+            results.append({
+                'line': line_num,
+                'input': expression,
+                'postfix': postfix_str,
+                'result': f"{assigned_var} = {result_value}"
+            })
+            
+        except ParseError as e:
+            errors.append(f'Line {line_num}: Parse Error: {str(e)}')
+        except NameError as e:
+            errors.append(f'Line {line_num}: Name Error: {str(e)}')
+        except Exception as e:
+            errors.append(f'Line {line_num}: Error: {str(e)}')
+    
+    return jsonify({
+        'success': True,
+        'results': results,
+        'errors': errors,
+        'symbol_table': dict(symbol_table)
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
